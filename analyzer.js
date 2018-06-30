@@ -1,6 +1,6 @@
 const fs = require("fs");
 const Web3 = require("web3");
-const logger = require('./csvLogger')('outputFile','\t');
+const logger = require('./csvLogger')('finalResults','\t');
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
 const inputFileName = process.argv[2];
 
