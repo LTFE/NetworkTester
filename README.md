@@ -9,7 +9,7 @@ Put files containing the IAT times into the `tests` folder. It should contain on
 Run `node tester.js` to run the test. You can follow its progress in the Ganache console.
 The results of this test will be written into a `testerOutputXX.tsv` file. (XX being the serial number automatically assigned to the test)
 
-Run 'node analyzer.js testerOutputXX.tsv' (XX corresponding with your test). This will create a `finalResultsXX.tsv` file. (XX being the serial number automatically assigned to the test)
+Run `node analyzer.js testerOutputXX.tsv` (XX corresponding with your test). This will create a `finalResultsXX.tsv` file. (XX being the serial number automatically assigned to the test)
 Afterwards you can use Excel or any other program to analyze the results.
 
 #### Notes
