@@ -7,8 +7,8 @@ const inputFileName = process.argv[2];
 
 async function main() {
 
-    // let file = fs.readFileSync(inputFileName);
-    let file = fs.readFileSync('outputFile0.csv');
+    let file = fs.readFileSync(inputFileName);
+    // let file = fs.readFileSync('outputFile0.csv');
     let rows = file.toString().split("\n");
     let lowestBlockNumber = Number.MAX_SAFE_INTEGER;
     let highestBlockNumber = -1;
