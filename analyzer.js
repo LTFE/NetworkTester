@@ -24,7 +24,7 @@ async function main() {
 
             let tx = await web3.eth.getTransaction(elements[3]);
             let receipt = await web3.eth.getTransactionReceipt(elements[3]);
-            let block = await web3.eth.getBlock(i);
+            let block = await web3.eth.getBlock(tx.blockNumber);
 
             if (tx.blockNumber > highestBlockNumber) {
                 highestBlockNumber = tx.blockNumber;
@@ -34,6 +34,7 @@ async function main() {
             }
 
             logger(['tx'].concat(elements.concat([tx.from, tx.to, tx.gas, receipt.gasUsed, tx.gasPrice, block.timestamp, tx.blockNumber, tx.blockHash])))
+
         }
 
         for (let i = lowestBlockNumber; i <= highestBlockNumber; i++){
