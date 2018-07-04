@@ -12,6 +12,32 @@ The results of this test will be written into a `testerOutputXX.tsv` file. (XX b
 Run `node analyzer.js testerOutputXX.tsv` (XX corresponding with your test). This will create a `finalResultsXX.tsv` file. (XX being the serial number automatically assigned to the test)
 Afterwards you can use Excel or any other program to analyze the results.
 
+#### Format
+
+In the finalOutput files the first column contains `tx` or `bl` whether the row is a transaction or block. The following columns are as follows:
+
+##### Transaction
+
+- the moment the sendTransaction function is called
+- the moment the transaction hash is received
+- test file name
+- txHash
+- sender
+- receiver
+- gas
+- gas used
+- gas price
+- block timestamp
+- block number
+- block hash
+
+##### Block
+
+- block number
+- block hash
+- block timestamp
+- transaction hashes, separated by `;`
+
 #### Notes
 
 The serial numbers are only use to prevent overwriting of previous test results
