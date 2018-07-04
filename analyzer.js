@@ -7,8 +7,8 @@ const inputFileName = process.argv[2];
 
 async function main() {
 
-    let file = fs.readFileSync(inputFileName);
-    // let file = fs.readFileSync('outputFile0.csv');
+    // let file = fs.readFileSync(inputFileName);
+    let file = fs.readFileSync('testerOutput0.tsv');
     let rows = file.toString().split("\n");
     let lowestBlockNumber = Number.MAX_SAFE_INTEGER;
     let highestBlockNumber = -1;
@@ -23,7 +23,8 @@ async function main() {
             let elements = row.split('\t');
 
             let tx = await web3.eth.getTransaction(elements[3]);
-
+            let receipt = await web3.eth.getTransactionReceipt(elements[3]);
+            let block = await web3.eth.getBlock(i);
 
             if (tx.blockNumber > highestBlockNumber) {
                 highestBlockNumber = tx.blockNumber;
@@ -32,7 +33,7 @@ async function main() {
                 lowestBlockNumber = tx.blockNumber
             }
 
-            logger(['tx'].concat(elements.concat([tx.from, tx.to, tx.gas, tx.gasPrice])))
+            logger(['tx'].concat(elements.concat([tx.from, tx.to, tx.gas, receipt.gasUsed, tx.gasPrice, block.timestamp, tx.blockNumber, tx.blockHash])))
         }
 
         for (let i = lowestBlockNumber; i <= highestBlockNumber; i++){
