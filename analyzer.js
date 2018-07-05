@@ -1,13 +1,14 @@
 const fs = require("fs");
 const Web3 = require("web3");
-const logger = require('./csvLogger')('finalResults','\t');
+
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
 const inputFileName = process.argv[2];
+const logger = require('./csvLogger')('finalResults','\t', false, inputFileName);
 
 
 async function main() {
 
-    let file = fs.readFileSync(inputFileName);
+    let file = fs.readFileSync('testerOutput' + inputFileName + '.tsv');
     // let file = fs.readFileSync('testerOutput0.tsv');
     let rows = file.toString().split("\n");
     let lowestBlockNumber = Number.MAX_SAFE_INTEGER;

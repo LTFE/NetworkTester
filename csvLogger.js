@@ -39,10 +39,14 @@ function getLineStr(arr, separator) {
     return output.slice(0, -1) + '\n';
 }
 
-module.exports = function (desiredFileName,separator, header) {
-
-    const fileName = getFirstAvailableName(desiredFileName, '.tsv');
-
+module.exports = function (desiredFileName,separator, header,  testCode) {
+    let fileName;
+    if(testCode) {
+        fileName = desiredFileName + testCode + '.tsv';
+    }
+    else {
+        fileName = getFirstAvailableName(desiredFileName, '.tsv');
+    }
     const logStream = fs.createWriteStream(`${__dirname}/${fileName}`, { flags: 'a' });
 
     if(header) {
