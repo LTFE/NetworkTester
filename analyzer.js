@@ -33,13 +33,13 @@ async function main() {
                 lowestBlockNumber = tx.blockNumber
             }
 
-            logger(['tx'].concat(elements.concat([tx.from, tx.to, tx.gas, receipt.gasUsed, tx.gasPrice, block.timestamp, tx.blockNumber, tx.blockHash])))
+            logger(['tx'].concat(elements.concat([tx.from, tx.to, tx.gas, receipt.gasUsed, tx.gasPrice, block.timestamp*1000, tx.blockNumber, tx.blockHash])))
 
         }
 
         for (let i = lowestBlockNumber; i <= highestBlockNumber; i++){
             let block = await web3.eth.getBlock(i);
-            logger(['bl', block.number, block.hash, block.timestamp, block.transactions.join(";")])
+            logger(['bl',block.timestamp*1000, block.number, block.hash, block.transactions.join(";")])
         }
     }
     catch (e) {
