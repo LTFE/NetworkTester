@@ -23,7 +23,9 @@ async function main() {
     for (let file of files) {
         fs.readFile("./tests/" + file, (err, data) => {
             if(err){
+                if(err.code === 'EISDIR') return;
                 console.error(arguments)
+
             }
             test(file, data.toString().split("\r\n").map(e => parseInt(e)));
         });
