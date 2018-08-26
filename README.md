@@ -6,15 +6,13 @@ Currently set up to connect to an Ethereum node at `HTTP://127.0.0.1:7545` (Gana
 
 Put files containing the IAT times into the `tests` folder. It should contain one IAT (in milliseconds) per line. Use the example file as a reference. Each of these files will be treated separately.
 
-Run `node tester.js` to run the test. You can follow its progress in the Ganache console.
-The results of this test will be written into a `testerOutputXX.tsv` file. (XX being the serial number automatically assigned to the test)
+Run `node tester.js` to run the test, using -i to specify the IAT files, and, optionally -o to specify the output file name. You can follow its progress in the Ganache console.
 
-Run `node analyzer.js testerOutputXX.tsv` (XX corresponding with your test). This will create a `finalResultsXX.tsv` file. (XX being the serial number automatically assigned to the test)
-Afterwards you can use Excel or any other program to analyze the results.
+Example: `node tester.js -o myOutputFile -i "constantLoad.txt onePerMinute.txt randomIAT.txt customIAT.txt"`
 
 #### Format
 
-In the finalOutput files the first column contains `tx` or `bl` whether the row is a transaction or block. The following columns are as follows:
+Data about blocks and transactions is gathered into separate files.
 
 ##### Transaction
 
