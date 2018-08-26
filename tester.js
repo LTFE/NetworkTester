@@ -7,6 +7,7 @@ const fs = require("fs-extra");
 const files = argv.inputFiles;
 const outputFileName = argv.o;
 const tmpFileName = outputFileName + "_tmp";
+// const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://swether.ltfe.org:7545"));
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
 
 let addresses, nonces;
@@ -99,7 +100,7 @@ async function test(file, delays, logger) {
 
 async function startTest() {
     return new Promise(async (resolve, reject) => {
-        console.log("Using files:", files);
+        // console.log("Using files:", files);
         const logger = require('./csvLogger')(tmpFileName, '\t');
 
         addresses = await web3.eth.getAccounts();
@@ -108,6 +109,9 @@ async function startTest() {
             nonces.push(await web3.eth.getTransactionCount(addr))
         }
         let tests = [];
+        
+        console.log("Starting tests");
+        
         for (let file of files) {
             try {
                 let data = await fs.readFile("./tests/" + file);
