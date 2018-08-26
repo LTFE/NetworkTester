@@ -69,8 +69,6 @@ function checkArgv() {
         argv.inputFiles = argv.i.split(" ");
         console.log("IAT files: ", argv.inputFiles);
     }
-
-    console.log(argv);
 }
 
 
