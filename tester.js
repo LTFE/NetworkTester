@@ -24,7 +24,8 @@ function checkArgv() {
         console.log("Usage\n" +
             "\t-h\tGet help\n" +
             "\t-i\tSpecify input IAT file names with a space-separated string. These files will be taken from the \"tests\" folder\n" +
-            "\t-o\tSpecify output file name"
+            "\t-o\tSpecify output file name" +
+            // "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 10"
         );
         console.log();
         console.log(
@@ -70,6 +71,10 @@ function checkArgv() {
         argv.inputFiles = argv.i.split(" ");
         console.log("IAT files: ", argv.inputFiles);
     }
+
+    if(typeof argv.b !== "number"){
+        argv.b = 10;
+    }
 }
 
 
@@ -114,7 +119,7 @@ async function startTest() {
         
         for (let file of files) {
             try {
-                let data = await fs.readFile("./tests/" + file);
+                let data = await fs.readFile(__dirname + "/tests/" + file);
                 tests.push(test(file, data.toString().split("\r\n").map(e => parseInt(e)), logger));
             }
             catch (e){
@@ -128,7 +133,7 @@ async function startTest() {
 
 async function analyze() {
 
-    let file = await fs.readFile(tmpFileName + '0.tsv');
+    let file = await fs.readFile(`${__dirname}/${tmpFileName}0.tsv`);
 
     const txLogger = require('./csvLogger')(outputFileName + "Tx", '\t');
     const blLogger = require('./csvLogger')(outputFileName + "Bl", '\t');
@@ -172,9 +177,13 @@ async function analyze() {
 
 }
 
+async function waitEmptyBlocks(numberOfBlocks) {
+
+}
+
 async function main() {
     try {
-        await fs.unlink(tmpFileName + "0.tsv");
+        await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
     }
     catch (e) {
         
@@ -184,7 +193,7 @@ async function main() {
     console.log("Tests done. Waiting for transactions to be processed before getting extra data");
     await timeout("5000");
     await analyze();
-    await fs.unlink(tmpFileName + "0.tsv");
+    await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
     console.log("Data ready");
 }
 
