@@ -120,11 +120,12 @@ async function startTest() {
         for (let file of files) {
             try {
                 let data = await fs.readFile(__dirname + "/tests/" + file);
-                tests.push(test(file, data.toString().split("\r\n").map(e => parseInt(e)), logger));
+                tests.push(test(file, data.toString().split("\n").map(e => parseInt((e.trim()))), logger));
             }
             catch (e){
                 console.error("Can't find IAT file " + file);
-                console.error(arguments)
+                console.error(arguments);
+                process.exit(1)
             }
         }
         Promise.all(tests).then(resolve);
@@ -199,7 +200,13 @@ async function main() {
     console.log("Tests done. Waiting for transactions to be processed before getting extra data");
     await timeout("5000");
     await analyze();
-    await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
+    try {
+        await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
+    }
+    catch (e) {
+        console.log("Couldn't clean up tmp file");
+        console.error(e);
+    }
     console.log("Data ready");
 }
 
