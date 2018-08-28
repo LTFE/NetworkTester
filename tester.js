@@ -123,7 +123,7 @@ async function startTest() {
                 tests.push(test(file, data.toString().split("\r\n").map(e => parseInt(e)), logger));
             }
             catch (e){
-                if (e.code === 'EISDIR') return;
+                console.error("Can't find IAT file " + file);
                 console.error(arguments)
             }
         }
@@ -132,9 +132,10 @@ async function startTest() {
 }
 
 async function analyze() {
-    let file;
+    let file, rows;
     try {
         file = await fs.readFile(`${__dirname}/${tmpFileName}0.tsv`);
+        rows = file.toString().split("\n");
     }
     catch (e) {
         console.error("Error reading tmp file");
@@ -143,7 +144,7 @@ async function analyze() {
     const txLogger = require('./csvLogger')(outputFileName + "Tx", '\t');
     const blLogger = require('./csvLogger')(outputFileName + "Bl", '\t');
 
-    let rows = file.toString().split("\n");
+
     let lowestBlockNumber = Number.MAX_SAFE_INTEGER;
     let highestBlockNumber = -1;
 
