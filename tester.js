@@ -24,7 +24,7 @@ function checkArgv() {
         console.log("Usage\n" +
             "\t-h\tGet help\n" +
             "\t-i\tSpecify input IAT file names with a space-separated string. These files will be taken from the \"tests\" folder\n" +
-            "\t-o\tSpecify output file name" +
+            "\t-o\tSpecify output file name"
             // "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 10"
         );
         console.log();
@@ -52,7 +52,7 @@ function checkArgv() {
             "Transactions\n\t"
         );
 
-        process.exit(1);
+        process.exit(0);
     }
 
     if(typeof argv.o !== "string" || argv.o.length === 0){
@@ -132,9 +132,14 @@ async function startTest() {
 }
 
 async function analyze() {
-
-    let file = await fs.readFile(`${__dirname}/${tmpFileName}0.tsv`);
-
+    let file;
+    try {
+        file = await fs.readFile(`${__dirname}/${tmpFileName}0.tsv`);
+    }
+    catch (e) {
+        console.error("Error reading tmp file");
+        console.error(e);
+    }
     const txLogger = require('./csvLogger')(outputFileName + "Tx", '\t');
     const blLogger = require('./csvLogger')(outputFileName + "Bl", '\t');
 
