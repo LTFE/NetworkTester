@@ -3,12 +3,16 @@ checkArgv();
 
 const Web3 = require("web3");
 
+const path = require("path");
 const fs = require("fs-extra");
 const files = argv.inputFiles;
 const outputFileName = argv.o;
 const tmpFileName = outputFileName + "_tmp";
+const fullTmpFile = path.join(__dirname, tmpFileName + "0.tsv");
 // const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://swether.ltfe.org:7545"));
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
+
+
 
 let addresses, nonces;
 
@@ -24,8 +28,8 @@ function checkArgv() {
         console.log("Usage\n" +
             "\t-h\tGet help\n" +
             "\t-i\tSpecify input IAT file names with a space-separated string. These files will be taken from the \"tests\" folder\n" +
-            "\t-o\tSpecify output file name"
-            // "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 10"
+            "\t-o\tSpecify output file name" +
+            "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 5"
         );
         console.log();
         console.log(
@@ -73,7 +77,7 @@ function checkArgv() {
     }
 
     if(typeof argv.b !== "number"){
-        argv.b = 10;
+        argv.b = 5;
     }
 }
 
@@ -83,21 +87,27 @@ async function test(file, delays, logger) {
         for(const delay of delays) {
             let sent = new Date();
             let originAddrNumber = randomInt(addresses.length);
-            web3.eth.sendTransaction({
-                from: addresses[originAddrNumber],
-                to: addresses[randomInt(addresses.length)],
-                value: 0,
-                gas: 10e5,
-                nonce: nonces[originAddrNumber],
-                gasPrice: 1
-            }, function (err, txHash) {
-                if(err) {
-                    console.error(err);
-                }
-                logger([sent.getTime(), new Date().getTime(), file, txHash])
-            });
-            nonces[originAddrNumber]++;
-            await timeout(delay)
+            try {
+                web3.eth.sendTransaction({
+                    from: addresses[originAddrNumber],
+                    to: addresses[randomInt(addresses.length)],
+                    value: 0,
+                    gas: 10e5,
+                    nonce: nonces[originAddrNumber],
+                    gasPrice: 1
+                }, function (err, txHash) {
+                    if (err) {
+                        console.error(err);
+                    }
+                    logger([sent.getTime(), new Date().getTime(), file, txHash])
+                });
+                nonces[originAddrNumber]++;
+                await timeout(delay)
+            }
+            catch (e) {
+                console.log("error sending transaction");
+                console.log(e);
+            }
         }
         resolve();
     });
@@ -118,14 +128,16 @@ async function startTest() {
         console.log("Starting tests");
         
         for (let file of files) {
+            let filePath;
             try {
-                let data = await fs.readFile(__dirname + "/tests/" + file);
+                filePath = path.join(__dirname, "tests", file);
+                let data = await fs.readFile(filePath);
+
                 tests.push(test(file, data.toString().split("\n").map(e => parseInt((e.trim()))), logger));
             }
             catch (e){
                 console.error("Can't find IAT file " + file);
-                console.error(arguments);
-                process.exit(1)
+                console.error("Path: ", filePath);
             }
         }
         Promise.all(tests).then(resolve);
@@ -135,7 +147,7 @@ async function startTest() {
 async function analyze() {
     let file, rows;
     try {
-        file = await fs.readFile(`${__dirname}/${tmpFileName}0.tsv`);
+        file = await fs.readFile(fullTmpFile);
         rows = file.toString().split("\n");
     }
     catch (e) {
@@ -166,7 +178,7 @@ async function analyze() {
                 highestBlockNumber = tx.blockNumber;
             }
             if (tx.blockNumber < lowestBlockNumber) {
-                lowestBlockNumber = tx.blockNumber
+                lowestBlockNumber = tx.blockNumber;
             }
 
             txLogger(elements.concat([tx.from, tx.to, tx.gas, receipt.gasUsed, tx.gasPrice, block.timestamp*1000, tx.blockNumber, tx.blockHash]));
@@ -185,12 +197,39 @@ async function analyze() {
 }
 
 async function waitEmptyBlocks(numberOfBlocks) {
+    return new Promise(async function (resolve, reject) {
+        let numberOfEmptyBlocks = 0,
+            highestBlockNumber = -1;
+
+        while (numberOfEmptyBlocks < numberOfBlocks){
+            await timeout(2000);
+            let block;
+            try {
+                let blockNumber = await web3.eth.getBlockNumber();
+                if(blockNumber <= highestBlockNumber) continue;
+                highestBlockNumber = blockNumber;
+                block = await web3.eth.getBlock(highestBlockNumber);
+            }
+            catch (e) {
+                console.error("Can't get block info while waiting for empty blocks");
+                console.error(e);
+            }
+
+            if(block.transactions.length === 0){
+                numberOfEmptyBlocks ++;
+            }
+            else {
+                numberOfEmptyBlocks = 0;
+            }
+        }
+        resolve();
+    })
 
 }
 
 async function main() {
     try {
-        await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
+        await fs.unlink(fullTmpFile);
     }
     catch (e) {
         
@@ -198,10 +237,10 @@ async function main() {
     
     await startTest();
     console.log("Tests done. Waiting for transactions to be processed before getting extra data");
-    await timeout("5000");
+    await waitEmptyBlocks(argv.b);
     await analyze();
     try {
-        await fs.unlink(`${__dirname}/${tmpFileName}0.tsv`);
+        await fs.unlink(fullTmpFile);
     }
     catch (e) {
         console.log("Couldn't clean up tmp file");
