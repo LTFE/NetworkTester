@@ -13,8 +13,8 @@ const fullTmpFile = path.join(__dirname, tmpFileName + "0.tsv");
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
 
 
-
-let addresses, nonces;
+let addresses, nonces, totalTransactions = 0,
+    sentTransactions = 0;
 
 const timeout = ms => new Promise(res => setTimeout(res, ms));
 
@@ -81,9 +81,16 @@ function checkArgv() {
     }
 }
 
+function checkProgress() {
+    if ((sentTransactions % Math.floor(totalTransactions/20) === 0)) {
+        console.log(`${Math.round(100*sentTransactions/totalTransactions)}% (${sentTransactions}/${totalTransactions})`)
+    }
+}
 
 async function test(file, delays, logger) {
     return new Promise(async (resolve, reject) => {
+        totalTransactions += delays.length;
+
         for(const delay of delays) {
             let sent = new Date();
             let originAddrNumber = randomInt(addresses.length);
@@ -102,7 +109,9 @@ async function test(file, delays, logger) {
                     logger([sent.getTime(), new Date().getTime(), file, txHash])
                 });
                 nonces[originAddrNumber]++;
-                await timeout(delay)
+                sentTransactions++;
+                checkProgress();
+                await timeout(delay);
             }
             catch (e) {
                 console.log("error sending transaction");
@@ -154,6 +163,9 @@ async function analyze() {
         console.error("Error reading tmp file");
         console.error(e);
     }
+
+
+
     const txLogger = require('./csvLogger')(outputFileName + "Tx", '\t');
     const blLogger = require('./csvLogger')(outputFileName + "Bl", '\t');
 
@@ -236,8 +248,9 @@ async function main() {
     }
     
     await startTest();
-    console.log("Tests done. Waiting for transactions to be processed before getting extra data");
+    console.log("Tests done. Waiting for the transactions to be processed before analyzing them");
     await waitEmptyBlocks(argv.b);
+    console.log("Analyzing transactions");
     await analyze();
     try {
         await fs.unlink(fullTmpFile);
