@@ -95,6 +95,7 @@ async function test(file, delays, logger) {
             let sent = new Date();
             let originAddrNumber = randomInt(addresses.length);
             try {
+                nonces[originAddrNumber]++;
                 web3.eth.sendTransaction({
                     from: addresses[originAddrNumber],
                     to: addresses[randomInt(addresses.length)],
@@ -108,7 +109,7 @@ async function test(file, delays, logger) {
                     }
                     logger([sent.getTime(), new Date().getTime(), file, txHash])
                 });
-                nonces[originAddrNumber]++;
+
                 sentTransactions++;
                 checkProgress();
                 await timeout(delay);
@@ -130,11 +131,11 @@ async function startTest() {
         addresses = await web3.eth.getAccounts();
         nonces = [];
         for (let addr of addresses) {
-            nonces.push(await web3.eth.getTransactionCount(addr))
+            nonces.push((await web3.eth.getTransactionCount(addr))-1);
         }
         let tests = [];
         
-        console.log("Starting tests");
+
         
         for (let file of files) {
             let filePath;
@@ -246,9 +247,9 @@ async function main() {
     catch (e) {
         
     }
-    
+    console.log(`Starting tests at ${new Date()}`);
     await startTest();
-    console.log("Tests done. Waiting for the transactions to be processed before analyzing them");
+    console.log(`Tests done at ${new Date()}. Waiting for the transactions to be processed before analyzing them`);
     await waitEmptyBlocks(argv.b);
     console.log("Analyzing transactions");
     await analyze();
