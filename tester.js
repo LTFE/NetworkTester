@@ -17,6 +17,17 @@ let addresses, nonces, totalTransactions = 0,
     sentTransactions = 0;
 
 const timeout = ms => new Promise(res => setTimeout(res, ms));
+const usedAccounts = [-1, -1, -1];
+
+function nextAccount() {
+    let nextInt = randomInt(addresses.length);
+    while (usedAccounts.includes(nextInt)){
+        nextInt = randomInt(addresses.length);
+    }
+    usedAccounts.push(nextInt);
+    usedAccounts.shift();
+    return nextInt;
+}
 
 function randomInt(totalNumbers){
     return (Math.floor(Math.random()*totalNumbers))
@@ -93,7 +104,10 @@ async function test(file, delays, logger) {
 
         for(const delay of delays) {
             let sent = new Date();
-            let originAddrNumber = randomInt(addresses.length);
+            let originAddrNumber = nextAccount();
+
+            console.log(originAddrNumber, usedAccounts);
+
             try {
                 nonces[originAddrNumber]++;
                 web3.eth.sendTransaction({
