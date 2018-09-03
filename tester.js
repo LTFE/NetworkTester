@@ -106,7 +106,7 @@ async function test(file, delays, logger) {
             let sent = new Date();
             let originAddrNumber = nextAccount();
 
-            console.log(originAddrNumber, usedAccounts);
+            // console.log(originAddrNumber, usedAccounts);
 
             try {
                 nonces[originAddrNumber]++;
