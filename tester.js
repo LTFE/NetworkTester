@@ -7,8 +7,8 @@ const path = require("path");
 const fs = require("fs-extra");
 const files = argv.inputFiles;
 const outputFileName = argv.o;
-const tmpFileName = outputFileName + "_tmp";
-const fullTmpFile = path.join(__dirname, tmpFileName + "0.tsv");
+const tmpFileName = (outputFileName + "_tmp");
+const fullTmpFile = argv.a || path.join(__dirname, tmpFileName + "0.tsv");
 // const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://swether.ltfe.org:7545"));
 const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
 
@@ -40,7 +40,8 @@ function checkArgv() {
             "\t-h\tGet help\n" +
             "\t-i\tSpecify input IAT file names with a space-separated string. These files will be taken from the \"tests\" folder\n" +
             "\t-o\tSpecify output file name" +
-            "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 5"
+            "\t-b\tThe number of empty blocks that should pass before the analysis phase begins. Default 5" +
+            "\t-a\tAnalyze the provided file. This will not run any tests. Still uses -o"
         );
         console.log();
         console.log(
@@ -76,6 +77,11 @@ function checkArgv() {
     }
     else {
         console.log("Output file name: " + argv.o);
+    }
+
+    if(argv.a && typeof argv.a === "string"){
+        console.log("Tester running in analysis mode. Using file:" + argv.a);
+        return;
     }
 
     if(typeof argv.i !== "string" || argv.o.length === 0){
@@ -255,6 +261,15 @@ async function waitEmptyBlocks(numberOfBlocks) {
 }
 
 async function main() {
+    if(argv.a){
+        console.log(`Started analyzing transactions at ${new Date()}`);
+        await analyze();
+        console.log(`Data ready at ${new Date()}`);
+        return;
+    }
+
+
+
     try {
         await fs.unlink(fullTmpFile);
     }
@@ -264,17 +279,17 @@ async function main() {
     console.log(`Starting tests at ${new Date()}`);
     await startTest();
     console.log(`Tests done at ${new Date()}. Waiting for the transactions to be processed before analyzing them`);
-    await waitEmptyBlocks(argv.b);
-    console.log(`Started analyzing transactions at ${new Date()}`);
-    await analyze();
-    try {
-        await fs.unlink(fullTmpFile);
-    }
-    catch (e) {
-        console.log("Couldn't clean up tmp file");
-        console.error(e);
-    }
-    console.log(`Data ready at ${new Date()}`);
+    // await waitEmptyBlocks(argv.b);
+    // console.log(`Started analyzing transactions at ${new Date()}`);
+    // await analyze();
+    // try {
+    //     await fs.unlink(fullTmpFile);
+    // }
+    // catch (e) {
+    //     console.log("Couldn't clean up tmp file");
+    //     console.error(e);
+    // }
+    // console.log(`Data ready at ${new Date()}`);
 }
 
 main();
