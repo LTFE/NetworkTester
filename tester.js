@@ -279,17 +279,17 @@ async function main() {
     console.log(`Starting tests at ${new Date()}`);
     await startTest();
     console.log(`Tests done at ${new Date()}. Waiting for the transactions to be processed before analyzing them`);
-    // await waitEmptyBlocks(argv.b);
-    // console.log(`Started analyzing transactions at ${new Date()}`);
-    // await analyze();
-    // try {
-    //     await fs.unlink(fullTmpFile);
-    // }
-    // catch (e) {
-    //     console.log("Couldn't clean up tmp file");
-    //     console.error(e);
-    // }
-    // console.log(`Data ready at ${new Date()}`);
+    await waitEmptyBlocks(argv.b);
+    console.log(`Started analyzing transactions at ${new Date()}`);
+    await analyze();
+    try {
+        await fs.unlink(fullTmpFile);
+    }
+    catch (e) {
+        console.log("Couldn't clean up tmp file");
+        console.error(e);
+    }
+    console.log(`Data ready at ${new Date()}`);
 }
 
 main();
