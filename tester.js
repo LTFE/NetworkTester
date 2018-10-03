@@ -10,7 +10,7 @@ const outputFileName = argv.o;
 const tmpFileName = (outputFileName + "_tmp");
 const fullTmpFile = argv.a || path.join(__dirname, tmpFileName + "0.tsv");
 // const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://swether.ltfe.org:7545"));
-const web3 = new Web3(new Web3.providers.HttpProvider("HTTP://127.0.0.1:7545"));
+const web3 = new Web3(new Web3.providers.HttpProvider("http://193.138.63.98:42800"));
 
 
 let addresses, nonces, totalTransactions = 0,
@@ -117,8 +117,8 @@ async function test(file, delays, logger) {
             try {
                 nonces[originAddrNumber]++;
                 web3.eth.sendTransaction({
-                    from: addresses[originAddrNumber],
-                    to: addresses[randomInt(addresses.length)],
+                    from: addresses[originAddrNumber].address,
+                    to: addresses[randomInt(addresses.length)].address,
                     value: 0,
                     gas: 10e5,
                     nonce: nonces[originAddrNumber],
@@ -148,15 +148,12 @@ async function startTest() {
         // console.log("Using files:", files);
         const logger = require('./csvLogger')(tmpFileName, '\t');
 
-        addresses = await web3.eth.getAccounts();
-        nonces = [];
-        for (let addr of addresses) {
-            nonces.push((await web3.eth.getTransactionCount(addr))-1);
-        }
+        addresses = web3.eth.accounts.wallet;
+        nonces = new Array(addresses.length);
+        nonces.fill(0);
         let tests = [];
-        
 
-        
+
         for (let file of files) {
             let filePath;
             try {
@@ -229,6 +226,18 @@ async function analyze() {
 
 }
 
+async function createAccounts(numberOfAccounts) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            web3.eth.accounts.wallet.create(numberOfAccounts);
+            resolve();
+        }
+        catch (e) {
+            reject(e)
+        }
+    })
+}
+
 async function waitEmptyBlocks(numberOfBlocks) {
     return new Promise(async function (resolve, reject) {
         let numberOfEmptyBlocks = 0,
@@ -274,12 +283,15 @@ async function main() {
         await fs.unlink(fullTmpFile);
     }
     catch (e) {
-        
+
     }
+    console.log('Creating accounts');
+    await createAccounts(10);
     console.log(`Starting tests at ${new Date()}`);
     await startTest();
     console.log(`Tests done at ${new Date()}. Waiting for the transactions to be processed before analyzing them`);
-    await waitEmptyBlocks(argv.b);
+    // await waitEmptyBlocks(argv.b);
+    await timeout(10*1000);
     console.log(`Started analyzing transactions at ${new Date()}`);
     await analyze();
     try {
