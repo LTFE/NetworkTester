@@ -116,14 +116,36 @@ async function test(file, delays, logger) {
 
             try {
                 nonces[originAddrNumber]++;
+                // web3.eth.accounts.signTransaction({
+                //     // from: addresses[originAddrNumber].address,
+                //     to: addresses[randomInt(addresses.length)].address,
+                //     value: 0,
+                //     gas: 0,
+                //     nonce: nonces[originAddrNumber],
+                //     gasPrice: 1
+                // },
+                // addresses[originAddrNumber].privateKey,
+                // function (err, tx) {
+                //     console.log(arguments);
+                //     // web3.eth.accounts.recoverTransaction(tx.rawTransaction,(a,b,c,d,e) => {
+                //     //     console.log();
+                //     // });
+                //     web3.eth.sendSignedTransaction(tx.rawTransaction, function (err, txHash) {
+                //         if (err) {
+                //             console.error(err);
+                //         }
+                //         logger([sent.getTime(), new Date().getTime(), file, txHash])
+                //     })
+                // });
                 web3.eth.sendTransaction({
                     from: addresses[originAddrNumber].address,
                     to: addresses[randomInt(addresses.length)].address,
                     value: 0,
                     gas: 10e5,
                     nonce: nonces[originAddrNumber],
-                    gasPrice: 1
+                    gasPrice: 0
                 }, function (err, txHash) {
+                    console.log(txHash);
                     if (err) {
                         console.error(err);
                     }
