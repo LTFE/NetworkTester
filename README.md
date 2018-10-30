@@ -8,7 +8,9 @@ Put files containing the IAT times into the `tests` folder. It should contain on
 
 Run `node tester.js` to run the test, using -i to specify the IAT files, and, optionally -o to specify the output file name. You can follow its progress in the Ganache console.
 
-Example: `node tester.js -o myOutputFile -i "constantLoad.txt onePerMinute.txt randomIAT.txt customIAT.txt"`
+For a full list of options, run `node tester.js -h`.
+
+Example input: `node tester.js -o myOutputFile -i "constantLoad.txt onePerMinute.txt randomIAT.txt customIAT.txt"`
 
 #### Format
 
